@@ -1,21 +1,20 @@
-def main(args: Array[String]): Unit = {
-  val lines = linesFromFile("/Users/vincent.vanhassel/ESGI-cours/4-IBC/scala/IdeaProjects/scala-spark-boilerplate/src/main/scala/com/fakir/samples/fileExample.csv")
-  val withoutHeader = getRidOfHeader(lines)
-  filterLinesFile(withoutHeader).foreach(println)
-}
+object ObjectFinder{
+  def main(args: Array[String]): Unit = {
+    val path = "C:/Users/chara/Downloads/CSVExemple.csv"
+    filterLinesFromFile(readLinesFromFile(path)).foreach(println)
+    //lines.foreach(println)
+  }
 
-def linesFromFile(path: String): Array[String] = {
-  import scala.io._
-  Source.fromFile(path).getLines.toArray
-}
+  def readLinesFromFile(path: String): Array[String] = {
+    import scala.io._
+    Source.fromFile(path).getLines.toArray
+  }
 
-def getRidOfHeader (array: Array[String]) : Array[String] = {
-  val header = array.head
-  array.filter(line => line != header)
-}
-
-def filterLinesFile(array: Array[String]) : Array[String] = {
-  val dataFiltered = array.filter(line => line.split(", ")(2).toInt > 2000)
-  val result = dataFiltered.filter(line => line.split(", ")(3).toInt > 1)
-  result
+  def filterLinesFromFile(array: Array[String]): Array[String] = {
+    var newArray = new Array[String](0)
+    for(line <- array){
+      newArray = line.split(",").map(_.trim)
+    }
+    newArray
+  }
 }
