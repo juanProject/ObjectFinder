@@ -1,9 +1,10 @@
 import scala.collection.mutable.ArrayBuffer
+import scala.io._
 
 object ObjectFinder{
   def main(args: Array[String]): Unit = {
-    val path = "C:/Users/chara/Downloads/CSVExemple.csv"
-    //val path = "D:/juanj/Downloads/CSVExemple.csv"
+    //val path = "C:/Users/chara/Downloads/CSVExemple.csv"
+    val path = "D:/juanj/Downloads/CSVExemple.csv"
     val table = filterLinesFromFile(readLinesFromFile(path))
     /*println(
       for{
@@ -16,7 +17,6 @@ object ObjectFinder{
   }
 
   def readLinesFromFile(path: String): Array[String] = {
-    import scala.io._
     Source.fromFile(path).getLines.toArray
   }
 
