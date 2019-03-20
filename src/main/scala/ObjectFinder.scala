@@ -8,8 +8,7 @@ object ObjectFinder{
     //val path = "D:/juanj/Downloads/CSVExemple.csv"
     val table = filterLinesFromFile(readLinesFromFile(path))
     val listOfObject = table.map(line => createObjectFromArray(line) )
-
-    listOfObject.foreach( line => println(line))
+    listOfObject.foreach( line => println(line) )
   }
 
   /*
@@ -32,11 +31,12 @@ object ObjectFinder{
   def semiColumnToSeq(string: String) : Seq[String] = {
     string.split(";").map(_.trim).toSeq
   }
-
+  /*
   def stringIsInt(string: String): Either[Exception, Int] = {
     try Right(string.toInt)
     catch { case e: Exception => Left(e) }
   }
+  */
 
   /*
   * try to fit Array to an object in classIndex
@@ -48,6 +48,6 @@ object ObjectFinder{
     case cat if cat.length == 3 => Cat( cat.head, cat(1), cat(2).toInt )
     case film if film(0).contains(";") => Film( semiColumnToSeq(film.head), new Date ( film(1) ) )
     case person if person.length == 4 => Person( person.head, person(1), person(2).toInt, person(3).toInt )
-    case _ => "this class is not implemented yet"
+    case _ => "This class is not implemented yet"
   }
 }
