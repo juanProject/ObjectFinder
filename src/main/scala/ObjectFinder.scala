@@ -1,14 +1,23 @@
+import java.io.FileWriter
 import java.util.Date
 import ClassIndex._
 import scala.io._
 
 object ObjectFinder{
   def main(args: Array[String]): Unit = {
-    val path = "C:/Users/chara/Downloads/CSVExemple.csv"
-    //val path = "D:/juanj/Downloads/CSVExemple.csv"
+    //val path = "C:/Users/chara/Downloads/CSVExemple.csv"
+    //val jsonPath = "C:/Users/chara/Downloads/JSONExemple.json"
+    val path = "D:/juanj/Downloads/CSVExemple.csv"
+    val jsonPath = "D:/juanj/Downloads/JSONExemple.json"
     val table = filterLinesFromFile(readLinesFromFile(path))
-    val listOfObject = table.map(line => createObjectFromArray(line) )
+    val listOfObject = table.map( createObjectFromArray )
     listOfObject.foreach( line => println(line) )
+    val jsonArray = listOfObject.map( objectToJsonString )
+    jsonArray.foreach( line => println(line) )
+
+    val newFile = writeJsonInFile( createFile(jsonPath), jsonArrayToJsonString(jsonArray) )
+    newFile.close()
+
   }
 
   /*
@@ -31,6 +40,7 @@ object ObjectFinder{
   def semiColumnToSeq(string: String) : Seq[String] = {
     string.split(";").map(_.trim).toSeq
   }
+
   /*
   def stringIsInt(string: String): Either[Exception, Int] = {
     try Right(string.toInt)
@@ -50,4 +60,35 @@ object ObjectFinder{
     case person if person.length == 4 => Person( person.head, person(1), person(2).toInt, person(3).toInt )
     case _ => "This class is not implemented yet"
   }
+
+  /*
+   * TODO : create function that returns a string from seq separated by ; ( for actor and film )
+   * return json String for matched class
+   */
+  def objectToJsonString[A] ( c: A): String = c match {
+    case Actor( name, filmsPlayed ) => s"""{"name":"$name","filmsPlayed":"$filmsPlayed"}"""
+    case Car(brand, countryOfBirth, maxSpeed, horsePower, speeds) => s"""{"brand":"$brand","countryOfBirth":"$countryOfBirth","maxSpeed":$maxSpeed,"horsePower":$horsePower,"speeds":$speeds}"""
+    case Cat(name, race, age) => s"""{"name":"$name","race":"$race","age":$age}"""
+    case Film(mainActors, dateOfRelease) => s"""{"mainActors":"$mainActors","dateOfRelease":"$dateOfRelease"}"""
+    case Person(firstName, lastName, salary, numberOfChildren) => s"""{"firstName":"$firstName","lastName":"$lastName","salary":$salary,"numberOfChildren":$numberOfChildren}"""
+    case _ => "This class is not implemented yet"
+  }
+
+  def createFile( fileName: String): FileWriter={
+    new FileWriter(fileName)
+  }
+
+  def closeFile ( file: FileWriter ): Unit ={
+    file.close()
+  }
+
+  def writeJsonInFile( file: FileWriter, jsonString: String): FileWriter ={
+    file.write(jsonString)
+    file
+  }
+
+  def jsonArrayToJsonString ( jsonArray: Array[String]): String ={
+    "[" + jsonArray.foldLeft(""){(string, row) => { if ( row != jsonArray.last ) { string + row + ","} else { string + row }  }} + "]"
+  }
+
 }
