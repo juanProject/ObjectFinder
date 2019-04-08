@@ -5,65 +5,53 @@ import scala.io._
 
 object ObjectFinder{
   def main(args: Array[String]): Unit = {
-    //val path = "C:/Users/chara/Downloads/CSVExemple.csv"
-    //val jsonPath = "C:/Users/chara/Downloads/JSONExemple.json"
-    //val csvPath = "C:/Users/chara/Downloads/csvFromJson.csv"
-    val path = "D:/juanj/Downloads/CSVExemple.csv"
-    val jsonPath = "D:/juanj/Downloads/JSONExemple.json"
-    val csvPath = "D:/juanj/Downloads/csvFromJson.csv"
-
+    /*
+      Defining Directory path
+    */
+    val path = "C:/Temp/CSVExemple.csv"
+    val jsonPath = "C:/Temp/JSONExemple.json"
+    val csvPath = "C:/Temp/csvFromJson.csv"
+    /*
+      Writing JSON file from CSV
+    */
     val table = filterLinesFromFile(readLinesFromFile(path))
-
     val listOfObject = table.map( createObjectFromArray )
-    //listOfObject.foreach( println )
-
     val jsonArray = listOfObject.map( objectToJsonString )
-    //jsonArray.foreach( println )
-
     val jsonFile = writeJsonInFile( createFile(jsonPath), jsonArrayToJsonString(jsonArray) )
     jsonFile.close()
-
+    /*
+      Rewriting CSV file from generated JSON
+    */
     val parsedJson = parseJson(readLinesFromFile(jsonPath).mkString(""))
-    //parsedJson.foreach( line => println(line.mkString(",")) )
-
     val listOfObjectFromJson = parsedJson.map( createObjectFromParsedJson )
-    //listOfObjectFromJson.foreach( println )
-
     val csvFile = writeCSVFile( createFile(csvPath), listOfObjectFromJson.map( objectToCSV ) )
     csvFile.close()
   }
 
   /*
-  readLinesFromFile return file content line by line in an array
-   */
+    readLinesFromFile is a function to return file content line by line in a String array
+  */
   def readLinesFromFile(path: String): Array[String] = {
     Source.fromFile(path).getLines.toArray
   }
 
   /*
-  filterLinesFromFile split array by character "," and trim
-   */
+    filterLinesFromFile splits a String array using Char "," and trims whitespaces
+  */
   def filterLinesFromFile(array: Array[String]): Array[Array[String]] = {
     array.map(line => line.split(",").map(_.trim) )
   }
 
   /*
-  semiColumnToSeq split array by ";" , trim it and return Seq[string]
-   */
+    semiColumnToSeq splits a String array using Char ";" , and trims whitespaces
+  */
   def semiColumnToSeq(string: String) : Seq[String] = {
     string.split(";").map(_.trim).toSeq
   }
 
   /*
-  def stringIsInt(string: String): Either[Exception, Int] = {
-    try Right(string.toInt)
-    catch { case e: Exception => Left(e) }
-  }
+    createObjectFromArray creates an Object according to the contents of the Array
   */
-
-  /*
-  * try to fit Array to an object in classIndex
-  * */
   def createObjectFromArray(array: Array[String] ): Any = array match{
     //case noResult if noResult.length < 2 => "this class is not implemented yet"
     case actor if actor(1).contains(";") => Actor( actor.head, semiColumnToSeq( actor(1) ) )
@@ -75,9 +63,8 @@ object ObjectFinder{
   }
 
   /*
-   * TODO : create function that returns a string from seq separated by ; ( for actor and film )
-   * return json String for matched class
-   */
+    objectToJsonString creates a String to generate JSON based on Type Matching of the Array in parameter
+  */
   def objectToJsonString[A] ( c: A): String = c match {
     case Actor( name, filmsPlayed ) => "{\"name\":\"" + name + "\",\"filmsPlayed\":\"" + filmsPlayed.mkString(";") + "\"}"
     case Car(brand, countryOfBirth, maxSpeed, horsePower, speeds) => s"""{"brand":"$brand","countryOfBirth":"$countryOfBirth","maxSpeed":$maxSpeed,"horsePower":$horsePower,"speeds":$speeds}"""
@@ -87,6 +74,9 @@ object ObjectFinder{
     case _ => ""
   }
 
+  /*
+    objectToCSV creates a String to generate CSV based on Type Matching
+  */
   def objectToCSV[A] ( c: A): String = c match {
     case Actor( name, filmsPlayed ) => name + "," + filmsPlayed.mkString(";")
     case Car(brand, countryOfBirth, maxSpeed, horsePower, speeds) => s"$brand,$countryOfBirth,$maxSpeed,$horsePower,$speeds"
@@ -96,28 +86,45 @@ object ObjectFinder{
     case _ => ""
   }
 
+  /*
+    toFormatedDate formats the date to a comprehensible format
+  */
   def toFormatedDate ( date: Date): String ={
     "%02d".format(date.getMonth + 1) + "/" + "%02d".format(date.getDate) + "/" + (date.getYear + 1900)
   }
 
-
+  /*
+    createFile creates a FileWriter with the path + name
+  */
   def createFile( fileName: String): FileWriter={
     new FileWriter(fileName)
   }
 
+  /*
+    writeJsonInFile writes the JSON using the FileWriter and a String
+  */
   def writeJsonInFile( file: FileWriter, jsonString: String): FileWriter ={
     file.write(jsonString)
     file
   }
 
+  /*
+    jsonArrayToJsonString transforms an Array of String to a signle String
+  */
   def jsonArrayToJsonString ( jsonArray: Array[String]): String ={
     "[" + jsonArray.mkString(",") + "]"
   }
 
+  /*
+    parseJson splits a String using the Regex characters
+  */
   def parseJson ( json: String ) : Array[Array[String]] = {
     filterLinesFromFile(json.split("""},[{]|}]|\[[{]"""))
   }
 
+  /*
+    getJsonValue parses and removes special chars to get Value from jsonString
+  */
   def getJsonValue ( jsonElem: String ): String = {
     val value = jsonElem.split("\"[ ]*:[ ]*\"?").last.trim
     if ( value.contains("\"")){
@@ -127,6 +134,9 @@ object ObjectFinder{
     }
   }
 
+  /*
+    createObjectFromParsedJson uses an Array to create an Object based on Type Matching
+  */
   def createObjectFromParsedJson ( parsedJson: Array[String] ): Any = parsedJson match{
     case empty if empty.length < 2 => "This class is not implemented yet"
     case actor if actor(1).contains("\"filmsPlayed\"") => Actor( getJsonValue(actor.head), semiColumnToSeq(getJsonValue(actor(1))) )
@@ -137,6 +147,9 @@ object ObjectFinder{
     case _ => "This class is not implemented yet"
   }
 
+  /*
+    writeCSVFile uses the CSVArray to generate the new CSV File
+  */
   def writeCSVFile( file: FileWriter, csvArray: Array[String]): FileWriter ={
     csvArray.foreach( line => file.write(line + "\n") )
     file
