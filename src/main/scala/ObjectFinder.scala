@@ -151,8 +151,7 @@ object ObjectFinder{
     writeCSVFile uses the CSVArray to generate the new CSV File
   */
   def writeCSVFile( file: FileWriter, csvArray: Array[String]): FileWriter ={
-    csvArray.foreach( line => file.write(line + "\n") )
+    csvArray.foreach( line => if(line!="") file.write(line + "\n") )
     file
   }
-
 }
